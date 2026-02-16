@@ -1,0 +1,160 @@
+version: 2
+
+models:
+  - name: stg_members
+    description: "Staged member demographics and enrollment data with data quality transformations"
+    columns:
+      - name: member_id
+        description: "Unique member identifier - primary key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: date_of_birth
+        description: "Member date of birth"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: date
+      
+      - name: current_age
+        description: "Calculated current age in years"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 120
+      
+      - name: zip_code
+        description: "Standardized 5-digit zip code"
+        tests:
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              value: 5
+      
+      - name: phone
+        description: "Standardized 10-digit phone number"
+        tests:
+          - dbt_expectations.expect_column_value_lengths_to_equal:
+              value: 10
+              config:
+                where: "phone is not null"
+
+  - name: stg_providers
+    description: "Staged provider master data with standardized formats"
+    columns:
+      - name: provider_id
+        description: "Unique provider identifier - primary key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: npi
+        description: "National Provider Identifier - should be unique when present"
+        tests:
+          - unique:
+              where: "npi is not null"
+      
+      - name: specialty
+        description: "Provider medical specialty"
+        tests:
+          - not_null
+
+  - name: stg_claims
+    description: "Staged claims with deduplication and enriched financial metrics"
+    columns:
+      - name: claim_id
+        description: "Unique claim identifier - primary key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: member_id
+        description: "Foreign key to members"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_members')
+              field: member_id
+              config:
+                where: "claim_status != 'Denied'"
+      
+      - name: provider_id
+        description: "Foreign key to providers"
+        tests:
+          - relationships:
+              to: ref('stg_providers')
+              field: provider_id
+              config:
+                severity: warn
+      
+      - name: billed_amount
+        description: "Amount billed by provider"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      
+      - name: paid_amount
+        description: "Amount paid to provider - should not exceed allowed amount"
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+          - dbt_utils.expression_is_true:
+              expression: "<= allowed_amount"
+      
+      - name: days_to_submit
+        description: "Number of days between service and submission"
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      
+      - name: is_late_arrival
+        description: "Flag for claims submitted >30 days after service"
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+  - name: stg_member_eligibility
+    description: "Staged member eligibility with data quality flags"
+    columns:
+      - name: eligibility_id
+        description: "Unique eligibility record identifier - primary key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: member_id
+        description: "Foreign key to members"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_members')
+              field: member_id
+      
+      - name: has_invalid_date_range
+        description: "Flag for records where end date < start date"
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+  - name: stg_provider_network_status
+    description: "Staged provider network participation status"
+    columns:
+      - name: network_status_id
+        description: "Unique network status record identifier - primary key"
+        tests:
+          - unique
+          - not_null
+      
+      - name: provider_id
+        description: "Foreign key to providers"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_providers')
+              field: provider_id
+      
+      - name: is_currently_active
+        description: "Flag indicating if network status is currently active"
+        tests:
+          - accepted_values:
+              values: [true, false]

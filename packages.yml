@@ -1,0 +1,16 @@
+packages:
+  # dbt Utils - common macros and tests
+  - package: dbt-labs/dbt_utils
+    version: 1.3.0
+  
+  # Audit helper - for comparing model versions
+  - package: dbt-labs/audit_helper
+    version: 0.9.0
+  
+  # Codegen - for generating boilerplate
+  - package: dbt-labs/codegen
+    version: 0.12.1
+  
+  # dbt Expectations - Great Expectations-style tests
+  - package: calogica/dbt_expectations
+    version: 0.10.1

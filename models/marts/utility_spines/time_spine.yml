@@ -1,0 +1,13 @@
+semantic_models:
+  - name: time_spine
+    model: ref('time_spine')
+    primary_key: [date_day]
+
+    dimensions:
+      - name: date_day
+        type: time
+        type_params:
+          time_granularity: day
+
+    entities: []
+    measures: []

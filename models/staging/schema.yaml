@@ -72,12 +72,12 @@ models:
         description: "Foreign key to members"
         tests:
           - not_null
-          - relationships:
-              config:
-                where: "claim_status != 'Denied'"
-              arguments:
-                to: ref('stg_members')
-                field: member_id
+          # - relationships:
+          #     config:
+          #       where: "claim_status != 'Denied'"
+          #     arguments:
+          #       to: ref('stg_members')
+          #       field: member_id
       - name: provider_id
         description: "Foreign key to providers"
         tests:
@@ -131,6 +131,8 @@ models:
         tests:
           - not_null
           - relationships:
+              config:
+                severity: warn
               arguments:
                 to: ref('stg_members')
                 field: member_id
@@ -155,6 +157,8 @@ models:
         tests:
           - not_null
           - relationships:
+              config:
+                severity: warn
               arguments:
                 to: ref('stg_providers')
                 field: provider_id

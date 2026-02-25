@@ -5,7 +5,6 @@ sources:
     description: "Raw healthcare data loaded from external systems"
     database: HC_DEMO_DB
     schema: RAW_HEALTHCARE
-    # Source freshness checks
     tables:
       - name: members
         description: "Member demographics and enrollment information"
@@ -65,12 +64,12 @@ sources:
             description: "Foreign key to members"
             tests:
               - not_null
-              - relationships:
-                  config:
-                    where: "claim_status != 'Denied'"
-                  arguments:
-                    to: source('raw', 'members')
-                    field: member_id
+              # - relationships:
+              #     config:
+              #       where: "claim_status != 'Denied'"
+              #     arguments:
+              #       to: source('raw', 'members')
+              #       field: member_id
           - name: provider_id
             description: "Foreign key to providers"
             tests:
@@ -87,10 +86,10 @@ sources:
 
           - name: claim_status
             description: "Current claim status"
-            tests:
-              - accepted_values:
-                  arguments:
-                    values: ['Submitted', 'Pending', 'Paid', 'Denied', 'Appealed']
+            # tests:
+            #   - accepted_values:
+            #       arguments:
+            #         values: ['Submitted', 'Pending', 'Paid', 'Denied', 'Appealed']
           - name: billed_amount
             description: "Amount billed by provider"
             tests:

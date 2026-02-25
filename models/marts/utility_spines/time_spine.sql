@@ -9,5 +9,4 @@ with date_spine as (
 )
 select cast(date_day as date) as date_day
 from date_spine
-order by 1;
-``
+order by 1

@@ -1,7 +1,9 @@
 semantic_models:
   - name: time_spine
     model: ref('time_spine')
-    primary_key: [date_day]
+    description: "Continuous daily date spine for the Semantic Layer"
+
+    entities: []   # keep empty for a pure spine
 
     dimensions:
       - name: date_day
@@ -9,5 +11,4 @@ semantic_models:
         type_params:
           time_granularity: day
 
-    entities: []
-    measures: []
+    measures: []   # none needed
